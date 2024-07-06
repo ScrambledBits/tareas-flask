@@ -1,0 +1,33 @@
+pyproject.toml
+echo "##active_line2##"
+poetry.lock
+echo "##active_line3##"
+node_modules
+echo "##active_line4##"
+*.pyc
+echo "##active_line5##"
+__pycache__/
+echo "##active_line6##"
+.env
+echo "##active_line7##"
+.DS_Store
+echo "##active_line8##"
+*.log
+echo "##active_line9##"
+*.sqlite3
+echo "##active_line10##"
+*.db
+echo "##active_line11##"
+*.pyo
+echo "##active_line12##"
+*.pyd
+echo "##active_line13##"
+*.pyc
+echo "##active_line14##"
+__pycache__/
+echo "##active_line15##"
+instance/
+echo "##active_line16##"
+.webassets-cache
+echo "##active_line17##"
+

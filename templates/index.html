@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Tareas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script>
+        function toggleDescription(id) {
+            var desc = document.getElementById('desc-' + id);
+            if (desc.style.display === 'none') {
+                desc.style.display = 'block';
+            } else {
+                desc.style.display = 'none';
+            }
+        }
+
+        function toggleCompletion(id) {
+            var checkbox = document.getElementById('checkbox-' + id);
+            var completed = checkbox.checked;
+            var li = document.getElementById('li-' + id);
+            if (completed) {
+                li.classList.add('line-through', 'text-gray-500');
+            } else {
+                li.classList.remove('line-through', 'text-gray-500');
+            }
+            fetch('/actualizar/' + id, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ completado: completed })
+            }).then(response => {
+                if (!response.ok) {
+                    alert('Error al actualizar la tarea');
+                }
+            });
+            showUpdateButton();
+        }
+
+        function showUpdateButton() {
+            var updateButton = document.getElementById('update-button');
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            var anyCompleted = Array.from(checkboxes).some(checkbox => checkbox.checked);
+            if (anyCompleted) {
+                updateButton.style.display = 'block';
+            } else {
+                updateButton.style.display = 'none';
+            }
+        }
+
+        function showModal() {
+            var modal = document.getElementById('myModal');
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            var modal = document.getElementById('myModal');
+            modal.classList.add('hidden');
+        }
+
+        function deleteCompletedTasks() {
+            fetch('/eliminar_completadas', {
+                method: 'POST'
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Error al eliminar las tareas completadas');
+                }
+            });
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen">
+    <h1 class="text-4xl text-blue-500 mb-8">Lista de Tareas</h1>
+    <ul class="w-full max-w-md">
+        {% for tarea in tareas %}
+        <li id="li-{{ tarea.id }}" class="bg-gray-800 p-4 mb-4 rounded flex items-center {% if tarea.completado %}line-through text-gray-500{% endif %}">
+            <input type="checkbox" id="checkbox-{{ tarea.id }}" class="mr-4" {% if tarea.completado %}checked{% endif %} onclick="toggleCompletion({{ tarea.id }})">
+            <strong onclick="toggleDescription({{ tarea.id }})" class="cursor-pointer">{{ tarea.titulo }}</strong>
+            <div id="desc-{{ tarea.id }}" class="ml-4 hidden">
+                {{ tarea.descripcion }}
+                <a href="{{ url_for('editar_tarea', tarea_id=tarea.id) }}" class="text-blue-500 ml-2">Editar</a>
+            </div>
+            <a href="{{ url_for('eliminar_tarea', tarea_id=tarea.id) }}" class="text-red-500 ml-auto">Eliminar</a>
+        </li>
+        {% endfor %}
+    </ul>
+    <button id="update-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4 hidden" onclick="showModal()">Actualizar</button>
+    <a href="{{ url_for('agregar_tarea') }}" class="text-blue-500 mt-4">Agregar Nueva Tarea</a>
+
+    <!-- Modal -->
+    <div id="myModal" class="modal hidden">
+        <div class="modal-content bg-gray-800 text-white p-6 rounded">
+            <span class="close text-gray-500" onclick="closeModal()">&times;</span>
+            <p>¿Estás seguro de que deseas eliminar las tareas completadas?</p>
+            <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4" onclick="deleteCompletedTasks()">Sí</button>
+            <button class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mt-4" onclick="closeModal()">No</button>
+        </div>
+    </div>
+</body>
+</html>
